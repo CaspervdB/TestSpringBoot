@@ -15,6 +15,6 @@ public class HelloWorldController {
     @RequestMapping("/")
     @ResponseBody
     public String sayHello() {
-        return "Hello World Developer!!!";
+        return "I am Thor, Supreme Commander of the Asgard Fleet.";
     }
 }
