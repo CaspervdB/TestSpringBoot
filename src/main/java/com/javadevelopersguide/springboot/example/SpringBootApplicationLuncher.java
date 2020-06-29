@@ -1,5 +1,7 @@
 package com.javadevelopersguide.springboot.example;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 
 import java.net.URISyntaxException;
@@ -14,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * This Luncher for the spring boot application.
@@ -22,6 +25,9 @@ import java.nio.charset.StandardCharsets;
  *
  */
 public class SpringBootApplicationLuncher {
+
+   private static Logger log = LoggerFactory.getLogger(SpringBootApplicationLuncher.class);
+
     public static void main(String[] args) {
         String region = "eu";
         String appId = "co2_sensor_stenden";
@@ -36,6 +42,7 @@ public class SpringBootApplicationLuncher {
 
                 try
                 {
+                    log.info("Got uplink message!");
                     UplinkMessage message = (UplinkMessage) data;
                     System.out.println(message);
                     int co2 = (int)message.getPayloadFields().get("co2");
@@ -53,7 +60,7 @@ public class SpringBootApplicationLuncher {
                     int nodeId = Integer.parseInt(devId);
                     Obj.put("nodeID", nodeId);
                     String jsonMessage = Obj.toString();
-                    System.out.println("Message json: " + (jsonMessage));
+                    log.info("Message json: " + (jsonMessage));
 
                     HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
                     conn.setDoOutput(true);
@@ -62,34 +69,34 @@ public class SpringBootApplicationLuncher {
                     try(OutputStream os = conn.getOutputStream()) {
                         byte[] input = jsonMessage.getBytes(StandardCharsets.UTF_8);
                         os.write(input, 0, input.length);
-                        System.out.println("Message sent to API");
+                        log.info("Message sent to API");
                     }catch (Exception out) {
-                        System.out.println("Something went wrong with sending the message!");
+                        log.error("Something went wrong with sending the message!");
                     }
-                    System.out.println(conn.getResponseCode()); // 200 - 299 (200)
+                    log.info("" +conn.getResponseCode()); // 200 - 299 (200)
 
 
                 }catch (Exception ex) {
-                    System.out.println("Cry in the bathroom: " + ex.getMessage());
-                    ex.printStackTrace();
+                    log.error("Cry in the bathroom: " + ex.getMessage());
+                    log.error(Arrays.toString(ex.getStackTrace()));
                 }
             });
 
-            client.onActivation((String _devId, ActivationMessage _data) -> System.out.println("Activation: " + _devId + ", data: " + _data.getDevAddr()));
+            client.onActivation((String _devId, ActivationMessage _data) -> log.info("Activation: " + _devId + ", data: " + _data.getDevAddr()));
 
-            client.onError((Throwable _error) -> System.err.println("error: " + _error.getMessage()));
+            client.onError((Throwable _error) -> log.error("error: " + _error.getMessage()));
 
-            client.onConnected((Connection _client) -> System.out.println("connected!"));
+            client.onConnected((Connection _client) -> log.info("connected!"));
 
             client.start();
 
         } catch (URISyntaxException ex)
         {
-            ex.printStackTrace();
-            System.out.println(ex.getMessage());
+            log.error(Arrays.toString(ex.getStackTrace()));
+            log.error(ex.getMessage());
         } catch (Exception ex)
         {
-            ex.printStackTrace();
+            log.error(Arrays.toString(ex.getStackTrace()));
         }
         SpringApplication.run(HelloWorldController.class, args);
     }
