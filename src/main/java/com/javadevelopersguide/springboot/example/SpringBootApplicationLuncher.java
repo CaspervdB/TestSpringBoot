@@ -46,8 +46,8 @@ public class SpringBootApplicationLuncher {
                     UplinkMessage message = (UplinkMessage) data;
                     System.out.println(message);
                     int co2 = (int)message.getPayloadFields().get("co2");
-                    double temperature = (double)message.getPayloadFields().get("temperature");
-                    double humidity = (double)message.getPayloadFields().get("humidity");
+                    double temperature = Double.valueOf(message.getPayloadFields().get("temperature").toString());
+                    double humidity = Double.valueOf(message.getPayloadFields().get("humidity").toString());
                     int tvoc = (int)message.getPayloadFields().get("tvoc"); // hydrocarbons
                     String DateTime = java.time.LocalDateTime.now().toString();
                     JSONObject Obj = new JSONObject();
